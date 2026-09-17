@@ -33,9 +33,15 @@ ok "tools present"
 mkdir -p "$(dirname "$KEY_FILE")"
 KEY="$(cat "$KEY_FILE" 2>/dev/null | tr -d '[:space:]' || true)"
 if [ -z "$KEY" ]; then
-  printf '\n  Paste this kiosk'"'"'s shelf key and press Enter: '
-  read -r KEY
-  KEY="$(printf '%s' "$KEY" | tr -d '[:space:]')"
+  # Asked on the terminal itself, and asked again on an empty answer: a
+  # pasted command brings its own Enter, and the Enter typed after it landed
+  # here as "no key". Test CPU, 2026-09-17.
+  for _ in 1 2 3; do
+    printf '\n  Paste this kiosk'"'"'s shelf key and press Enter: '
+    read -r KEY < /dev/tty
+    KEY="$(printf '%s' "$KEY" | tr -d '[:space:]')"
+    [ -n "$KEY" ] && break
+  done
   [ -n "$KEY" ] || { no "no key given"; exit 1; }
   printf '%s\n' "$KEY" > "$KEY_FILE"; chmod 600 "$KEY_FILE"
 fi
