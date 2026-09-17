@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The one command that installs or upgrades a kiosk.
 #
-#   bash <(wget -qO- https://raw.githubusercontent.com/raghavjm-glitch/alacard-install/main/go.sh)
+#   wget -q -O /tmp/go.sh https://raw.githubusercontent.com/raghavjm-glitch/alacard-install/main/go.sh && bash /tmp/go.sh
 #
 # This file is PUBLIC on purpose, so a fresh machine can fetch it with no
 # key. It contains no secrets and no source. It asks for the kiosk's shelf
