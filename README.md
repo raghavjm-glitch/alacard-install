@@ -2,7 +2,7 @@
 
 One line, on the kiosk:
 
-    bash <(wget -qO- https://raw.githubusercontent.com/raghavjm-glitch/alacard-install/main/go.sh)
+    wget -q -O /tmp/go.sh https://raw.githubusercontent.com/raghavjm-glitch/alacard-install/main/go.sh && bash /tmp/go.sh
 
 It asks for the kiosk's key once and does the rest. Everything it installs
 comes from a private shelf that needs that key.
