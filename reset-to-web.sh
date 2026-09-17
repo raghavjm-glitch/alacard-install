@@ -5,7 +5,7 @@
 # Removes everything the Flutter install added. Keeps Ubuntu, AnyDesk, the
 # printer drivers, CUPS and the shop's network. Reboot afterwards.
 #
-#   wget -q -O /tmp/reset-to-web.sh https://raw.githubusercontent.com/raghavjm-glitch/alacard-install/main/reset-to-web.sh && bash /tmp/reset-to-web.sh
+#   wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/reset-to-web.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/reset-to-web.sh && bash /tmp/reset-to-web.sh
 set -u
 ok()   { printf '\033[32m✓\033[0m %s\n' "$*"; }
 note() { printf '  %s\n' "$*"; }
