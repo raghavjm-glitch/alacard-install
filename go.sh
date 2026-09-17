@@ -23,9 +23,19 @@ b "Alacard kiosk — install"
 # Tools first. The very first launch stopped here because the machine had
 # neither curl nor unzip and the old command needed both before it could
 # install anything. apt, never snap.
-if ! command -v curl >/dev/null 2>&1 || ! command -v unzip >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; then
+need_tools() { ! command -v curl >/dev/null 2>&1 || ! command -v unzip >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; }
+if need_tools; then
   b "Installing the tools this needs (curl, unzip, python3)"
-  sudo apt-get update -qq && sudo apt-get install -y -qq curl unzip python3 >/dev/null
+  sudo apt-get update -qq; sudo apt-get install -y -qq curl unzip python3 >/dev/null || true
+  # A kiosk in Mumbai had a corrupted package list ("Malformed
+  # Description-md5 line"); apt refused everything, curl never arrived, and
+  # the script went on to blame the key. Clear the lists and try once more.
+  if need_tools; then
+    echo "  package list looks damaged — clearing it and trying again"
+    sudo rm -rf /var/lib/apt/lists/*
+    sudo apt-get update -qq; sudo apt-get install -y -qq curl unzip python3 >/dev/null || true
+  fi
+  need_tools && { no "could not install curl/unzip/python3 — the internet or Ubuntu's package server is not reachable from here"; exit 1; }
 fi
 ok "tools present"
 
