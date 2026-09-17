@@ -38,7 +38,7 @@ if [ -z "$KEY" ]; then
   # here as "no key". Test CPU, 2026-09-17.
   for _ in 1 2 3; do
     printf '\n  Paste this kiosk'"'"'s shelf key and press Enter: '
-    read -r KEY < /dev/tty
+    read -rs KEY < /dev/tty; echo
     KEY="$(printf '%s' "$KEY" | tr -d '[:space:]')"
     [ -n "$KEY" ] && break
   done
@@ -67,8 +67,25 @@ ID="$(curl -fsS -H "Authorization: Bearer $KEY" -H "Accept: application/vnd.gith
       | python3 -c "import sys,json; a=[x for x in json.load(sys.stdin)['assets'] if x['name']=='$ZIP']; print(a[0]['id'] if a else '')")"
 [ -n "$ID" ] || { no "build $VERSION has no package on the shelf"; exit 1; }
 rm -rf "$HOME/kiosk-new" && mkdir -p "$HOME/kiosk-new"
-curl -fL -H "Authorization: Bearer $KEY" -H "Accept: application/octet-stream" \
-  -o /tmp/k.zip "$API/releases/assets/$ID"
+# Two doors. The release asset lives on GitHub's file server, which some
+# Indian ISPs quietly block — Raghav's shop sat at 0 bytes for minutes on
+# 2026-09-17. A copy of every build is also committed into the shelf repo,
+# and that copy comes through api.github.com, which those ISPs do allow.
+# Try the first door for at most 30 seconds of silence, then use the second.
+rm -f /tmp/k.zip
+if curl -fL --connect-timeout 15 --speed-limit 1000 --speed-time 30 \
+     -H "Authorization: Bearer $KEY" -H "Accept: application/octet-stream" \
+     -o /tmp/k.zip "$API/releases/assets/$ID"; then
+  ok "downloaded"
+else
+  echo "  the direct download is not getting through here — using the other route"
+  rm -f /tmp/k.zip
+  curl -fL --connect-timeout 15 --speed-limit 1000 --speed-time 60 \
+     -H "Authorization: Bearer $KEY" -H "Accept: application/vnd.github.raw" \
+     -o /tmp/k.zip "$API/contents/builds/$ZIP" \
+    || { no "could not download build $VERSION by either route"; exit 1; }
+  ok "downloaded (via api.github.com)"
+fi
 unzip -q /tmp/k.zip -d "$HOME/kiosk-new"
 ok "unpacked"
 
