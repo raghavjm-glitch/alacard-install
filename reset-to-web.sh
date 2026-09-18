@@ -8,6 +8,12 @@
 #   wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/reset-to-web.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/reset-to-web.sh && bash /tmp/reset-to-web.sh
 set -u
 ok()   { printf '\033[32m✓\033[0m %s\n' "$*"; }
+
+# A guard, because this reads like the install command and removes the
+# kiosk. Only a person typing the word runs it.
+printf '\nThis REMOVES the new kiosk from this machine (for a rehearsal). Type  reset  to go on: '
+read -r ANSWER < /dev/tty
+[ "$ANSWER" = "reset" ] || { echo "Nothing done."; exit 0; }
 note() { printf '  %s\n' "$*"; }
 bold() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
@@ -53,6 +59,7 @@ rm -rf "$HOME/alacard" "$HOME/kiosk-new" "$HOME/.local/state/alacard" \
        "$HOME/.local/bin/alacard-update.sh" "$HOME/.local/bin/alacard-keeper.sh" "$HOME/.local/bin/alacard-start.sh" \
        "$HOME/.local/share/applications/alacard-kiosk.desktop" "$HOME/.local/share/icons/alacard.png"
 rm -rf "$HOME"/.local/share/*alacard* 2>/dev/null
+rm -f "$HOME/Desktop/Alacard Kiosk.desktop"
 sudo rm -f /etc/alacard-update.conf /etc/X11/xorg.conf.d/99-alacard-touch.conf
 ok "app, settings, saved cards, shelf key and diary key removed"
 
