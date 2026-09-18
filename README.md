@@ -2,7 +2,7 @@
 
 One line, on the kiosk:
 
-    wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/go.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/go.sh && bash /tmp/go.sh
+    wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/go.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/go.sh && bash /tmp/go.sh || echo "COULD NOT DOWNLOAD THE INSTALL SCRIPT — check the internet and paste the command again"
 
 It asks for the kiosk's key once and does the rest. Everything it installs
 comes from a private shelf that needs that key.
