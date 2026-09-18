@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # The one command that installs or upgrades a kiosk.
 #
-#   wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/go.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/go.sh && bash /tmp/go.sh || echo "COULD NOT DOWNLOAD THE INSTALL SCRIPT — check the internet and paste the command again"
+#   { wget -4 -T 20 -t 2 -q --header='Accept: application/vnd.github.raw' -O /tmp/go.sh https://api.github.com/repos/raghavjm-glitch/alacard-install/contents/go.sh || echo "COULD NOT DOWNLOAD THE INSTALL SCRIPT — check the internet and paste the command again"; } && bash /tmp/go.sh
+#
+#   (The message belongs to the download only. Written the first way, it
+#   also fired when the install ended with a red NOT done — Prayagraj,
+#   2026-09-18 — and read as a second, different failure.)
 #
 # This file is PUBLIC on purpose, so a fresh machine can fetch it with no
 # key. It contains no secrets and no source. It asks for the kiosk's shelf
