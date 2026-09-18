@@ -131,48 +131,10 @@ fi
 unzip -q /tmp/k.zip -d "$HOME/kiosk-new"
 ok "unpacked"
 
-# The diary's link to Drive, if the shelf holds one.
-#
-# Linking a kiosk to Drive otherwise needs a Google sign-in on that machine,
-# which cannot be done for twenty-five kiosks over AnyDesk. The office
-# kiosk's link works on every kiosk (one Drive, one folder), so it is kept
-# on the private shelf and delivered here. Absent → the setup says so and
-# the kiosk simply has no diary until it is added.
-#
-# Always the shelf's copy, not only when the machine has none: the key on
-# the shelf is the one that works, and when it changes (rclone's shared
-# Google client id is being retired during 2026 and a new key will replace
-# it) every kiosk must follow. A copy on the machine that differs is kept
-# beside it, in case.
-RC="$HOME/.config/rclone/rclone.conf"
-mkdir -p "$(dirname "$RC")"
-if curl -fsS $T -o "$RC.shelf" -H "Authorization: Bearer $KEY" -H "Accept: application/vnd.github.raw" \
-     "$API/contents/diary/rclone.conf" 2>/dev/null && [ -s "$RC.shelf" ]; then
-  if [ -f "$RC" ] && ! cmp -s "$RC" "$RC.shelf"; then cp -f "$RC" "$RC.previous"; fi
-  mv -f "$RC.shelf" "$RC"; chmod 600 "$RC"; ok "diary key installed"
-else
-  rm -f "$RC.shelf"
-  [ -f "$RC" ] && ok "diary key already on this machine (none on the shelf)" \
-    || printf '  \033[33m!\033[0m %s\n' "no diary key on the shelf yet — the diary will not sync until one is added"
-fi
-
-# A current rclone. Ubuntu 18.04's own is from 2017 and no longer talks to
-# Google Drive — the office kiosk got a newer one another way, and it was
-# the only kiosk whose diary ever wrote a line (Delhi and Santa Cruz never
-# did, 2026-09-17/18). The shelf carries a current .deb under kit/.
-have_rclone() { rclone version 2>/dev/null | head -1 | grep -qE 'v1\.([5-9][0-9]|[1-9][0-9]{2,})'; }
-if ! have_rclone; then
-  b "Installing a current rclone (the diary needs it)"
-  DEB="$(curl -fsS $T -H "Authorization: Bearer $KEY" "$API/contents/kit" 2>/dev/null \
-        | python3 -c "import sys,json; n=[x['name'] for x in json.load(sys.stdin) if x['name'].startswith('rclone-') and x['name'].endswith('amd64.deb')]; print(n[0] if n else '')" 2>/dev/null || true)"
-  if [ -n "$DEB" ] && curl -fsSL --connect-timeout 15 --speed-limit 1000 --speed-time 60 \
-       -H "Authorization: Bearer $KEY" -H "Accept: application/vnd.github.raw" \
-       -o "/tmp/$DEB" "$API/contents/kit/$DEB" && sudo dpkg -i "/tmp/$DEB" >/dev/null 2>&1 && have_rclone; then
-    ok "rclone $(rclone version | head -1 | awk '{print $2}') installed"
-  else
-    printf '  \033[33m!\033[0m %s\n' "could not install a current rclone — the diary may not sync (the rest continues)"
-  fi
-fi
+# The diary key and a current rclone come from the shelf inside the setup
+# (setup-kiosk.sh, step 8), which the self-updater re-runs after every
+# build — so a replaced key or a newer rclone reaches every kiosk by
+# itself. Nothing to do here.
 
 # Hand over. switch-from-web parks the old browser kiosk if there is one and
 # then runs the normal setup; on a machine with no old kiosk it just sets up.
